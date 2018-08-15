@@ -6,6 +6,7 @@ import App from './App.vue'
 import './styles/index.scss'
 import VueRouter from "vue-router"
 import Login from "@/views/Login.vue"
+import Home from "@/views/home"
 
 Vue.config.productionTip = false
 
@@ -14,7 +15,8 @@ Vue.use(ElementUI)
 
 var router=new VueRouter({
   routes:[
-    {path:'/login',component: Login}
+    {path:'/login',component: Login},
+    {path:'/',component:Home}
   ]
 })
 new Vue({
