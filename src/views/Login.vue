@@ -36,16 +36,17 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          alert("submit!");
+          // alert("submit!");
           // console.log(valid)
           LoginPost(this.ruleForm).then(res => {
             if (res.meta.status === 200) {
-              // console.log(res.meta.msg);
+              console.log(res); localStorage.setItem('myToken',res.data.token)
               this.$router.push("/");
               this.$message({
                 message: "恭喜你，登录成功",
                 type: "success"
               });
+             
             }else{
               this.$message({
                 message: "登录失败",

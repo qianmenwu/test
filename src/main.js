@@ -19,6 +19,19 @@ var router=new VueRouter({
     {path:'/',component:Home}
   ]
 })
+router.beforeEach((to, from, next) => {
+  let token=localStorage.getItem('myToken')
+  if(token){
+    next()
+  }else{
+    if(to.path !=='/login'){
+      next({path:'login'})
+    }else{
+      next()
+    }
+
+  }
+})
 new Vue({
   router,
   render: h => h(App)
