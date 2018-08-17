@@ -40,7 +40,9 @@ export default {
           // console.log(valid)
           LoginPost(this.ruleForm).then(res => {
             if (res.meta.status === 200) {
-              console.log(res); localStorage.setItem('myToken',res.data.token)
+              console.log(res); 
+              localStorage.setItem('myToken',res.data.token)
+              localStorage.setItem('username',res.data.username)
               this.$router.push("/");
               this.$message({
                 message: "恭喜你，登录成功",

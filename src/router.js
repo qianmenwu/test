@@ -10,25 +10,12 @@ var router=new VueRouter({
     routes:[
       {path:'/login',component: Login},
       {path:'/',component:Home,
-      redirect:{path:'welcome'},
+      redirect:{path:'welcome'},//重定向
       children:[
           {path:'welcome',component:welcome}
       ]
     }
     ]
   })
-  //全局守卫
-  router.beforeEach((to, from, next) => {
-    let token=localStorage.getItem('myToken')
-    if(token){
-      next()
-    }else{
-      if(to.path !=='/login'){
-        next({path:'login'})
-      }else{
-        next()
-      }
-  
-    }
-  })
+
   export default router

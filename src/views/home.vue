@@ -4,7 +4,6 @@
             <el-aside width="auto'">
               <div class="logo" ></div>
                  <el-menu
-                    default-active="1-1"
                     class="el-menu-admin"
                     @open="handleOpen"
                     @close="handleClose"
@@ -12,12 +11,12 @@
                     text-color="#fff"
                     active-text-color="#ffd04b"
                      :collapse="isCollapse">
-                        <el-submenu index="1">
+                        <el-submenu index="manageuser">
                         <template slot="title">
                         <i class="el-icon-location"></i>
                           <span>用户管理</span>
                         </template>
-                          <el-menu-item index="1-1">
+                          <el-menu-item index="listuser">
                            <i class="el-icon-menu"></i>用户列表
                          </el-menu-item>                                    
                     </el-submenu>
@@ -37,7 +36,7 @@
                   <i class="myicon myicon-menu toggle-btn" @click="toggleCollapse"></i>
                   <div class='system-title'>电商管理系统</div>
                   <div>
-                    <span class="welcome">你好,xxx</span>
+                    <span class="welcome">你好,{{$store.state.username}}</span>
                    <el-button type="text" @click='exit'>退出</el-button>
                   </div>
                   
@@ -54,16 +53,14 @@ export default {
     data() {
       return {
         isCollapse:false,
-        kuan:200
       };
     },
   methods: {
-    
-    handleOpen(key, keyPath) {
-      console.log(key, keyPath);
+    handleOpen() {
+      // console.log(key, keyPath);
     },
-    handleClose(key, keyPath) {
-      console.log(key, keyPath);
+    handleClose() {
+      // console.log(key, keyPath);
     },
     toggleCollapse() {
       this.isCollapse = !this.isCollapse
