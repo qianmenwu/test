@@ -6,7 +6,7 @@ axios.defaults.baseURL = baseURL
 //拦截器
 axios.interceptors.request.use(function (config) {
     // Do something before request is sent
-    console.log(config)
+    // console.log(config)
     let token= localStorage.getItem('myToken')
     if(token){
         config.headers.Authorization = token
@@ -21,3 +21,4 @@ export const LoginPost = function (params) {
     return res.data
   })
 }
+export const userList=params=>axios.get('/users',params).then(res=>res.data)
