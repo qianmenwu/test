@@ -74,7 +74,7 @@
                   <el-button
                         type="danger"
                         size="mini"
-                        @click="handleDel(scope.$index, scope.row)"
+                        @click="delUserHandle(scope.row)"
                         icon="el-icon-delete">
                     </el-button><el-button
                         type="warning"
@@ -124,7 +124,8 @@ import {
   addUser,
   changeStatus,
   getUserById,
-  editUser
+  editUser,
+  delUser
 } from "../../api/index.js";
 export default {
   data() {
@@ -270,6 +271,24 @@ export default {
           });
         }
       });
+    },
+    delUserHandle(row){
+        delUser(row.id).then(res=>{
+           if(res.meta.status===200){
+               if (res.meta.status === 200) {
+              this.$message({
+                type: "success",
+                message: "删除用户成功"
+              });
+              this.getDataList()
+            } else {
+              this.$message({
+                type: "error",
+                message: "删除用户失败"
+              });
+            } 
+           }
+        })
     }
   }
 };
