@@ -27,3 +27,5 @@ export const changeStatus = params => axios.put(`users/${params.uid}/state/${par
 export const getUserById = params => axios.put(`users/${params}`).then(res => res.data)
 export const editUser = params => axios.put(`users/${params.id}`,params).then(res => res.data)
 export const delUser = params => axios.delete(`users/${params}`).then(res => res.data)
+export const getRoleList = params => axios.get('/roles').then(res => res.data)
+export const grantUser = params => axios.put(`users/${params.id}/role`,params).then(res => res.data)

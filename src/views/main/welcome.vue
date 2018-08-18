@@ -79,7 +79,7 @@
                     </el-button><el-button
                         type="warning"
                         size="mini"
-                        @click="handlePower(scope.$index, scope.row)"
+                        @click="grantUserHandle(scope.row)"
                         icon="el-icon-check">
                     </el-button>
                     </template>
@@ -104,6 +104,32 @@
                     <el-button type="primary" @click="submitEditUser('editUserName')">确 定</el-button>
                 </div>
             </el-dialog>
+
+             <!-- 权限弹出框 -->
+            <el-dialog title="分配角色" :visible.sync="grantDialogFormVisible">
+                <el-form :model="grantForm">
+                    <el-form-item label="当前用户" :label-width="formLabelWidth">
+                    <!-- <el-input v-model="grantForm.username" ></el-input> -->
+                    <el-tag type="info">{{grantForm.username}}</el-tag>
+                    </el-form-item>
+                      <el-form-item label="请选择角色" :label-width="formLabelWidth">
+                   <el-select v-model="selectId" placeholder="请选择角色">
+                        <el-option 
+                            v-for="(item,index) in roleList"
+                            :key="index"
+                            :label="item.roleName"
+                            :value="item.id">
+                         </el-option>
+                       
+                    </el-select>
+                    </el-form-item>
+                  
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="grantDialogFormVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="submitGrantUser">确 定</el-button>
+                </div>
+            </el-dialog>
         <!--分页部分--> 
             <el-pagination
                 class="page"
@@ -125,7 +151,9 @@ import {
   changeStatus,
   getUserById,
   editUser,
-  delUser
+  delUser,
+  getRoleList,
+  grantUser
 } from "../../api/index.js";
 export default {
   data() {
@@ -146,6 +174,9 @@ export default {
         mobile: "",
         id: 0
       },
+      grantForm: {},
+      selectId: "",
+      roleList: [],
       rules: {
         username: [
           { required: true, message: "请输入用户名", trigger: "blur" }
@@ -163,6 +194,7 @@ export default {
       },
       addDialogFormVisible: false,
       editDialogFormVisible: false,
+      grantDialogFormVisible: false,
       formLabelWidth: "120px"
     };
   },
@@ -260,7 +292,7 @@ export default {
                 type: "success",
                 message: "用户编辑成功"
               });
-              this.getDataList()
+              this.getDataList();
               this.editDialogFormVisible = false;
             } else {
               this.$message({
@@ -272,23 +304,49 @@ export default {
         }
       });
     },
-    delUserHandle(row){
-        delUser(row.id).then(res=>{
-           if(res.meta.status===200){
-               if (res.meta.status === 200) {
-              this.$message({
-                type: "success",
-                message: "删除用户成功"
-              });
-              this.getDataList()
-            } else {
-              this.$message({
-                type: "error",
-                message: "删除用户失败"
-              });
-            } 
-           }
-        })
+    delUserHandle(row) {
+      delUser(row.id).then(res => {
+        if (res.meta.status === 200) {
+          this.$message({
+            type: "success",
+            message: "删除用户成功"
+          });
+          this.getDataList();
+        } else {
+          this.$message({
+            type: "error",
+            message: "删除用户失败"
+          });
+        }
+      });
+    },
+    grantUserHandle(row) {
+      this.grantDialogFormVisible = true;
+      //   console.log(row);
+      this.grantForm = row;
+      getRoleList().then(res => {
+        console.log(res);
+        if (res.meta.status === 200) {
+          this.roleList = res.data;
+        }
+      });
+    },
+    submitGrantUser() {
+      grantUser({ id: this.grantForm.id, rid: this.selectId }).then(res => {
+        if (res.meta.status === 200) {
+          this.$message({
+            type: "success",
+            message: "分配角色成功"
+          });
+          this.grantDialogFormVisible = false;
+          this.getDataList();
+        } else {
+          this.$message({
+            type: "error",
+            message: "分配角色失败"
+          });
+        }
+      });
     }
   }
 };
