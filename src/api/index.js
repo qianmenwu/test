@@ -26,3 +26,4 @@ export const addUser = params => axios.post('/users', params).then(res => res.da
 export const changeStatus = params => axios.put(`users/${params.uid}/state/${params.type}`).then(res => res.data)
 export const getUserById = params => axios.put(`users/${params}`).then(res => res.data)
 export const editUser = params => axios.put(`users/${params.id}`,params).then(res => res.data)
+export const delUser = params => axios.delete(`users/${params}`).then(res => res.data)
