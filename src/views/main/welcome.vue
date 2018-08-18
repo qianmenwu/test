@@ -9,11 +9,32 @@
         <!-- 搜索级添加用户部分 -->
         <div class="user">
             <div style="margin-top: 15px; margin-bottom: 15px">
-                <el-input placeholder="请输入内容" v-model="searchList" class="search-input">
-                <el-button slot="append" icon="el-icon-search"></el-button>
+                <el-input placeholder="请输入内容" v-model="searchList" class="search-input" @keyup.native="searchBtn">
+                <el-button slot="append" icon="el-icon-search" @click="searchBtn"></el-button>
                </el-input>
-              <el-button type="success">添加用户</el-button>
+              <el-button type="success" @click="addDialogFormVisible =true">添加用户</el-button>
             </div>
+            <!-- 添加用户弹框 -->
+            <el-dialog title="添加用户" :visible.sync="addDialogFormVisible">
+                <el-form :model="addForm" :rules="rules">
+                    <el-form-item label="活动名称" prop="username" :label-width="formLabelWidth">
+                    <el-input v-model="addForm.name" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码" prop="password" :label-width="formLabelWidth">
+                    <el-input v-model="addForm.password" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱" prop="email" :label-width="formLabelWidth">
+                    <el-input v-model="addForm.email" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="电话" prop="mobile" :label-width="formLabelWidth">
+                    <el-input v-model="addForm.mobile" auto-complete="off"></el-input>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="addDialogFormVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="addUser">确 定</el-button>
+                </div>
+            </el-dialog>
         <!-- 用户列表部分 -->
             <el-table
                 :data="userList"
@@ -82,31 +103,67 @@
 <script>
 import { userList } from "../../api/index.js";
 export default {
-    data() {
-      return {
+  data() {
+    return {
       searchList: "",
       userList: [],
       currentPage: 3,
-      userstatus: true
+      userstatus: true,
+      addForm: {
+        username: "",
+        password: "",
+        email: "",
+        mobile: ""
+      },
+      rules: {
+        username: [
+          { required: true, message: "请输入用户名", trigger: "blur" }
+        ],
+        password: [{ required: true, message: "请输入密码", trigger: "blur" }],
+        email: [
+          { required: true, message: "请输入邮箱地址", trigger: "blur" },
+          {type: "email",message: "请输入正确的邮箱地址",rigger: "blur,change" }
+           ],
+        mobile: [{ required: true, message: "电话不能为空" }]
+      },
+      addDialogFormVisible: false,
+      formLabelWidth: "120px"
     };
   },
+
   mounted() {
     this.getDataList();
+  },
+  methods: {
+    handleSizeChange() {
+      //   console.log(`每页 ${val} 条`);
     },
-     methods: {
-      handleSizeChange(val) {
-        console.log(`每页 ${val} 条`);
-      },
-      handleCurrentChange(val) {
-        console.log(`当前页: ${val}`);
+    handleCurrentChange() {
+      //   console.log(`当前页: ${val}`);
     },
     getDataList() {
-      userList({ params: { query: "", pagenum: 1, pagesize: 2 } }).then(res =>
-        // console.log(res),
-        this.userList= res.data.users
+      userList({ params: { query: "", pagenum: 1, pagesize: 5 } }).then(
+        res =>
+          // console.log(res),
+          (this.userList = res.data.users)
       );
-      }
-}
+    },
+    searchBtn() {
+      userList({
+        params: { query: this.searchList, pagenum: 1, pagesize: 5 }
+      }).then(res => {
+        // console.log(this.searchList)
+        if (!this.searchList) {
+          this.getDataList();
+          return;
+        }
+        this.userList = res.data.users;
+      });
+    },
+    addUser(){
+        
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>
