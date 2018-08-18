@@ -16,9 +16,9 @@
             </div>
             <!-- 添加用户弹框 -->
             <el-dialog title="添加用户" :visible.sync="addDialogFormVisible">
-                <el-form :model="addForm" :rules="rules">
-                    <el-form-item label="活动名称" prop="username" :label-width="formLabelWidth">
-                    <el-input v-model="addForm.name" auto-complete="off"></el-input>
+                <el-form :model="addForm" :rules="rules" ref="addUserName">
+                    <el-form-item label="用户名" prop="username" :label-width="formLabelWidth">
+                    <el-input v-model="addForm.username" auto-complete="off"></el-input>
                     </el-form-item>
                     <el-form-item label="密码" prop="password" :label-width="formLabelWidth">
                     <el-input v-model="addForm.password" auto-complete="off"></el-input>
@@ -32,7 +32,7 @@
                 </el-form>
                 <div slot="footer" class="dialog-footer">
                     <el-button @click="addDialogFormVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="addUser">确 定</el-button>
+                    <el-button type="primary" @click="submitUser('addUserName')">确 定</el-button>
                 </div>
             </el-dialog>
         <!-- 用户列表部分 -->
@@ -54,13 +54,13 @@
                    >
                 </el-table-column>
                     <el-table-column
-                    prop="emile"
+                    prop="email"
                     label="邮件"
                     >
                 </el-table-column>
                 <el-table-column label="用户状态">
                     <template slot-scope="scope">
-                         <el-switch v-model="userstatus"></el-switch>
+                         <el-switch v-model="scope.row.mg_state" @change="changeUserStatus(scope.row)"></el-switch>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
@@ -68,24 +68,42 @@
                     <el-button
                         type="primary"
                         size="mini"
-                        @click="handleEdit(scope.$index, scope.row)"
+                        @click="editUserHandle(scope.row)"
                         icon="el-icon-edit">
                     </el-button>
                   <el-button
                         type="danger"
                         size="mini"
-                        @click="handleEdit(scope.$index, scope.row)"
+                        @click="handleDel(scope.$index, scope.row)"
                         icon="el-icon-delete">
                     </el-button><el-button
                         type="warning"
                         size="mini"
-                        @click="handleEdit(scope.$index, scope.row)"
+                        @click="handlePower(scope.$index, scope.row)"
                         icon="el-icon-check">
                     </el-button>
                     </template>
                 </el-table-column>
-
             </el-table>
+
+             <!-- 编辑弹出框 -->
+            <el-dialog title="编辑用户" :visible.sync="editDialogFormVisible">
+                <el-form :model="editForm" :rules="rules" ref="editUserName">
+                    <el-form-item label="用户名" prop="username" :label-width="formLabelWidth" :disabled="true">
+                    <el-input v-model="editForm.username" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱" prop="email" :label-width="formLabelWidth">
+                    <el-input v-model="editForm.email" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="电话" prop="mobile" :label-width="formLabelWidth">
+                    <el-input v-model="editForm.mobile" auto-complete="off"></el-input>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="editDialogFormVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="submitEditUser('editUserName')">确 定</el-button>
+                </div>
+            </el-dialog>
         <!--分页部分--> 
             <el-pagination
                 class="page"
@@ -101,7 +119,13 @@
     </div>
 </template>
 <script>
-import { userList } from "../../api/index.js";
+import {
+  userList,
+  addUser,
+  changeStatus,
+  getUserById,
+  editUser
+} from "../../api/index.js";
 export default {
   data() {
     return {
@@ -115,6 +139,12 @@ export default {
         email: "",
         mobile: ""
       },
+      editForm: {
+        username: "",
+        email: "",
+        mobile: "",
+        id: 0
+      },
       rules: {
         username: [
           { required: true, message: "请输入用户名", trigger: "blur" }
@@ -122,11 +152,16 @@ export default {
         password: [{ required: true, message: "请输入密码", trigger: "blur" }],
         email: [
           { required: true, message: "请输入邮箱地址", trigger: "blur" },
-          {type: "email",message: "请输入正确的邮箱地址",rigger: "blur,change" }
-           ],
+          {
+            type: "email",
+            message: "请输入正确的邮箱地址",
+            rigger: "blur,change"
+          }
+        ],
         mobile: [{ required: true, message: "电话不能为空" }]
       },
       addDialogFormVisible: false,
+      editDialogFormVisible: false,
       formLabelWidth: "120px"
     };
   },
@@ -160,8 +195,81 @@ export default {
         this.userList = res.data.users;
       });
     },
-    addUser(){
-        
+    submitUser(formName) {
+      //   console.log(formName);
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          addUser(this.addForm).then(res => {
+            //   console.log(res)
+            if (res.meta.status === 201) {
+              this.$message({
+                type: "success",
+                message: "添加成功"
+              });
+              this.addDialogFormVisible = false;
+              this.getDataList();
+            } else {
+              this.$message({
+                type: "error",
+                message: "添加失败"
+              });
+            }
+          });
+        }
+      });
+    },
+    changeUserStatus(row) {
+      // console.log(row)
+      changeStatus({ uid: row.id, type: row.mg_state }).then(res => {
+        // console.log(res)
+        if (res.meta.status === 200) {
+          this.$message({
+            type: "success",
+            message: "用户状态修改成功"
+          });
+        } else {
+          this.$message({
+            type: "error",
+            message: "用户状态修改失败"
+          });
+        }
+      });
+    },
+    editUserHandle(row) {
+      console.log(row.id);
+      this.editDialogFormVisible = true;
+      getUserById(row.id).then(res => {
+        console.log(res);
+        if (res.meta.status === 200) {
+          this.editForm.username = row.username;
+          this.editForm.email = row.email;
+          this.editForm.mobile = row.mobile;
+          this.editForm.id = row.id;
+        }
+        // console.log(this.editForm)
+      });
+    },
+    submitEditUser(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          console.log(this.editForm);
+          editUser(this.editForm).then(res => {
+            if (res.meta.status === 200) {
+              this.$message({
+                type: "success",
+                message: "用户编辑成功"
+              });
+              this.getDataList()
+              this.editDialogFormVisible = false;
+            } else {
+              this.$message({
+                type: "error",
+                message: "用户编辑失败"
+              });
+            }
+          });
+        }
+      });
     }
   }
 };

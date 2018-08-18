@@ -34,13 +34,14 @@ export default {
   },
   methods: {
     submitForm(formName) {
+      // console.log(formName)
       this.$refs[formName].validate(valid => {
         if (valid) {
           // alert("submit!");
           // console.log(valid)
           LoginPost(this.ruleForm).then(res => {
             if (res.meta.status === 200) {
-              console.log(res); 
+              // console.log(res); 
               localStorage.setItem('myToken',res.data.token)
               localStorage.setItem('username',res.data.username)
               this.$router.push("/");
