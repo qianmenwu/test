@@ -305,20 +305,33 @@ export default {
       });
     },
     delUserHandle(row) {
-      delUser(row.id).then(res => {
-        if (res.meta.status === 200) {
-          this.$message({
-            type: "success",
-            message: "删除用户成功"
+      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          delUser(row.id).then(res => {
+            if (res.meta.status === 200) {
+              this.$message({
+                type: "success",
+                message: "删除用户成功"
+              });
+              this.getDataList();
+            } else {
+              this.$message({
+                type: "error",
+                message: "删除用户失败"
+              });
+            }
           });
-          this.getDataList();
-        } else {
+        })
+        .catch(() => {
           this.$message({
-            type: "error",
-            message: "删除用户失败"
+            type: "info",
+            message: "已取消删除"
           });
-        }
-      });
+        });
     },
     grantUserHandle(row) {
       this.grantDialogFormVisible = true;
