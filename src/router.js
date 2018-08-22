@@ -17,7 +17,7 @@ var router=new VueRouter({
       redirect:{path:'welcome'},//重定向
       children:[
           {path:'welcome',component:welcome},
-          {path:'user',component:user},
+          {path:'users',component:user},
           {path:'roles',component:Role},
           {path:'rights',component:Right},
       ]

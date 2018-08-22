@@ -4,7 +4,7 @@
         <el-breadcrumb separator="/" class="el-breadcrumb">
             <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item>权限管理</el-breadcrumb-item>
-            <el-breadcrumb-item>权限列表</el-breadcrumb-item>
+            <el-breadcrumb-item>角色列表</el-breadcrumb-item>
         </el-breadcrumb>
         <!-- 添加角色 -->
          <el-button plain>添加角色</el-button>
@@ -13,7 +13,7 @@
             style="width: 100%">
             <el-table-column type="expand">
             <template slot-scope="scope">
-                <el-form label-position="left" inline class="demo-table-expand">
+                <!-- <el-form label-position="left" inline class="demo-table-expand"> -->
                     <el-row v-for="firstChildren in scope.row.children" :key="firstChildren.id">
                         <el-col :span="4">
                             <el-tag closable @close="delRights(scope.row,firstChildren.id)" >{{firstChildren.authName}}</el-tag>
@@ -33,7 +33,7 @@
                         
                     </el-row>
                     
-                </el-form>
+                <!-- </el-form> -->
             </template>
             </el-table-column>
             <el-table-column
@@ -79,8 +79,9 @@
                     :data="roleData"
                     show-checkbox
                     node-key="id"
+                    ref="tree"
                     :default-expand-all='true'
-                    :default-checked-keys="[5]"
+                    :default-checked-keys="selectedRight"
                     :props="defaultProps">
                     </el-tree>
                 </div>
@@ -92,7 +93,7 @@
     </div>
 </template>
 <script>
-import {getRoleList, delRightRole, accredit} from "../../api/index.js"
+import {getRoleList, delRightRole, accredit, getRightsList} from "../../api/index.js"
 export default {
     data(){
         return {
@@ -102,7 +103,9 @@ export default {
             defaultProps: {
                 children: 'children',
                 label: 'authName'
-                }
+                },
+            selectedRight:[],
+            currentRole:[]
         }
     },
     mounted(){
@@ -111,7 +114,7 @@ export default {
     methods: {
         renderRoleList(){
            getRoleList().then(res=>{
-               console.log(res)
+            //    console.log(res)
             if(res.meta.status===200){
                 this.roleList=res.data
             }
@@ -132,7 +135,50 @@ export default {
         },
         showRoleHandle(row){
             this.rightsDialogFormVisible=true
-            this.roleData=row.children
+            this.currentRole=row
+            getRightsList({type:'tree'}).then(res=>{
+                // console.log(res)
+                if(res.meta.status===200){
+                    this.roleData=res.data
+                }else{
+                    this.$message({
+                        type:'error',
+                        message:res.meta.msg
+                    })
+                }
+            })
+            this.selectedRight.length=0
+            row.children.forEach(firstChildren=>{
+                if(firstChildren.children && firstChildren.children.length !==0){
+                    firstChildren.children.forEach(secondChildren=>{
+                        if(secondChildren.children && secondChildren.children.length !==0){
+                           secondChildren.children.forEach(thirdChildren=>{
+                            this.selectedRight.push(thirdChildren.id)
+                           })
+                        }
+                    })
+                }
+            })
+        },
+        submitRightList(){
+            var rids=this.$refs.tree.getCheckedKeys().join(',')
+            console.log(rids)
+            accredit(this.currentRole.id,{rids:rids}).then(res=>{
+            console.log(res)
+                if(res.meta.status===200){
+                    this.$message({
+                        type:'success',
+                        message:res.meta.msg,
+                    })
+                  this.rightsDialogFormVisible=false
+                  this.renderRoleList()
+                }else{
+                     this.$message({
+                        type:'error',
+                        message:res.meta.msg
+                    })
+                }
+            })
         }
     }
 }

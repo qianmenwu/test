@@ -13,16 +13,16 @@
                     text-color="#fff"
                     active-text-color="#ffd04b"
                      :collapse="isCollapse">
-                        <el-submenu index="1">
+                    <el-submenu :index="item.path" v-for="item in menusList" :key='item.id'>
                         <template slot="title">
                         <i class="el-icon-location"></i>
-                          <span>用户管理</span>
+                        <span>{{item.authName}}</span>
                         </template>
-                          <el-menu-item index="/user">
-                           <i class="el-icon-menu"></i>用户列表
-                         </el-menu-item>                                    
+                          <el-menu-item :index="tag.path" v-for="tag in item.children" :key='tag.id' >
+                          <i class="el-icon-menu"></i>{{tag.authName}}
+                      </el-menu-item>                                    
                     </el-submenu>
-                     <el-submenu index="2">
+                     <!-- <el-submenu index="2">
                         <template slot="title">
                         <i class="el-icon-location"></i>
                           <span>权限管理</span>
@@ -33,7 +33,7 @@
                           <el-menu-item index="/roles">
                            <i class="el-icon-menu"></i>角色列表
                          </el-menu-item>                                  
-                    </el-submenu>     
+                    </el-submenu>      -->
                 </el-menu>
             </el-aside>
             <el-container>
@@ -54,11 +54,19 @@
     </div>
 </template>
 <script>
+import {getMenus} from '../api/index.js'
 export default {
     data() {
       return {
         isCollapse:false,
+        menusList:[]
       };
+    },
+    mounted () {
+      getMenus().then(res=>{
+        console.log(res)
+        this.menusList=res.data
+      })
     },
   methods: {
     handleOpen() {
